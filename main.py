@@ -2,6 +2,7 @@
 
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
 
 from preProcess import *
 
@@ -30,8 +31,12 @@ def main():
     split_dataset(df)
     del df
     preprocess = PreProcessor(tr)
-    preprocess.df.info()
-    print(preprocess.V)
+
+    class_table = preprocess.df.label.value_counts()
+    class_table.plot(kind='bar',title="Distribution of class table")
+    print("Current distribution of training data")
+    print(class_table)
 
 if __name__=="__main__":
     main()
+    plt.show()

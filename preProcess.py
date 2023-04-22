@@ -1,4 +1,5 @@
 import pandas as pd, numpy as np
+import random
 
 def status_decorator(func):
     def decorate(*params,status=""):
@@ -7,12 +8,21 @@ def status_decorator(func):
         print("Done")
     return decorate
 
+def virus_location(virus_name):
+    if virus_name.startswith("montreal"): return "montreal"
+    if virus_name.startswith("padua"): return "padua"
+    if virus_name.startswith("princeton"): return "princeton"
+    return virus_name
+
 class PreProcessor:
 
     def __init__(self,dataframe,dim=None):
         self.df = dataframe
         self.df.rename(columns={"count":"counts"},inplace=True)
+        # Below line can be removed or commented to be more specific about the virus
+        self.df.label = self.df.label.apply(virus_location)
 
+        self.random_undersampling()
         self.clean_data()
         self.change_dtypes()
         self.dim_reduction()
@@ -41,7 +51,7 @@ class PreProcessor:
         """
         print("Cleaning data...",end="")
         if self.df.isnull().values.any():
-            self.df.fillna(dataframe.median(),inplace=True)
+            self.df.fillna(self.df.median(),inplace=True)
             self.df.dropna(inplace=True)
 
     @status_decorator
@@ -80,3 +90,25 @@ class PreProcessor:
 
         self.df = pd.concat([self.df,new_space],axis=1)
 
+    def random_undersampling(obj,thresh=1.25):
+        # Threshold = 25% of mean of samples. If the majority class exceeds this, it'll be sampled
+        print("Undersampling the data...",end="")
+        while True:
+            class_table = obj.df.label.value_counts()
+            mean_samples_per_class = class_table.mean()
+            
+            if class_table[0]<=round(1.25*mean_samples_per_class): break
+
+            majority = (obj.df.label==class_table.index[0])
+            majority_index = majority[majority].index
+
+            sampling_index = random.sample(
+                                list(majority_index),
+                                int(round(class_table[0] - thresh*mean_samples_per_class)),
+                                )
+            obj.df.drop(sampling_index,inplace=True)
+
+        obj.df.reset_index(drop=True,inplace=True)
+        data = len(obj.df)
+        print("finished undersampling.\nReduced data:",data)
+        return data

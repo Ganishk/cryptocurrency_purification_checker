@@ -7,63 +7,76 @@ def status_decorator(func):
         print("Done")
     return decorate
 
-@status_decorator
-def change_dtypes(df):
-    print("Changing datatypes...",end="")
-    df.address  = df.address.astype('object')
-    df.year     = df.year.astype(np.int64)
-    df.day      = df.day.astype(np.int64)
-    df.length   = df.length.astype(np.int64)
-    df.weight   = df.weight.astype(np.float64)
-    df.counts   = df.counts.astype(np.int64)
-    df.looped   = df.looped.astype(np.int64)
-    df.neighbors= df.neighbors.astype(np.int64)
-    df.income   = df.income.astype(np.int64)
-    df.label    = pd.Categorical(df.label)
+class PreProcessor:
 
-@status_decorator
-def clean_data(dataframe):
-    """
-    Here, we're using median as a central tendency. In a highly skewed dataset
-    like this, there is a little difference between the median and mean.
-    Also, it preserves the datatype of that column if it is a type of integer,
-    for which using mean might introduce a float value
-    """
-    print("Cleaning data...",end="")
-    if dataframe.isnull().values.any():
-        dataframe.fillna(dataframe.median(),inplace=True)
-        dataframe.dropna(inplace=True)
+    def __init__(self,dataframe,dim=None):
+        self.df = dataframe
+        self.df.rename(columns={"count":"counts"},inplace=True)
 
-@status_decorator
-def dim_reduction(dataframe,dim):
-    print("Reducing dimensions to",dim,end="")
-    global V
-    meanframe = dataframe.mean()
-    stdframe = dataframe.std(ddof=0,numeric_only=True)
-    print(" from",len(meanframe.index),end="\n")
-    features = meanframe.index
-    for feature in features:
-        dataframe['N'+feature] = (dataframe[feature] - meanframe[feature])/stdframe[feature]
+        self.clean_data()
+        self.change_dtypes()
+        self.dim_reduction()
 
-    features = "N"+features
-    covariance_matrix = dataframe[features].cov()
-    eig_vals,eig_vecs = np.linalg.eig(covariance_matrix)
-    idx = eig_vals.argsort()[::-1]
-    eig_vals = eig_vals[idx]
-    eig_vecs = eig_vecs[:,idx]
+    @status_decorator
+    def change_dtypes(self):
+        print("Changing datatypes...",end="")
+        self.df.address   = self.df.address.astype('object')
+        self.df.year      = self.df.year.astype(np.int64)
+        self.df.day       = self.df.day.astype(np.int64)
+        self.df.length    = self.df.length.astype(np.int64)
+        self.df.weight    = self.df.weight.astype(np.float64)
+        self.df.counts    = self.df.counts.astype(np.int64)
+        self.df.looped    = self.df.looped.astype(np.int64)
+        self.df.neighbors = self.df.neighbors.astype(np.int64)
+        self.df.income    = self.df.income.astype(np.int64)
+        self.df.label     = pd.Categorical(self.df.label)
 
-    V = eig_vecs[:,:dim]
-    dataframe = pd.concat([dataframe,dataframe[features]@V],axis=1)
-    print(dataframe)
-    
+    @status_decorator
+    def clean_data(self):
+        """
+        Here, we're using median as a central tendency. In a highly skewed dataset
+        like this, there is a little difference between the median and mean.
+        Also, it preserves the datatype of that column if it is a type of integer,
+        for which using mean might introduce a float value
+        """
+        print("Cleaning data...",end="")
+        if self.df.isnull().values.any():
+            self.df.fillna(dataframe.median(),inplace=True)
+            self.df.dropna(inplace=True)
 
-def preprocess(dataframe):
-    
-    #column name count, has a name collision with an inbuilt function of pandas
-    dataframe.rename(columns={"count":"counts"},inplace=True)
+    @status_decorator
+    def dim_reduction(self,dim=None):
+        print("Reducing dimensions to ",end="")
+        meanframe = self.df.mean()
+        stdframe = self.df.std(ddof=0,numeric_only=True)
+        features = meanframe.index
+        #normalising the values and adding them at the end
+        for feature in features:
+            self.df['N'+feature] = (self.df[feature] - meanframe[feature])/stdframe[feature]
 
-    #clean_data(dataframe,"Cleaning...")
-    clean_data(dataframe)
-    change_dtypes(dataframe)
-    dim_reduction(dataframe,6)
+        covariance_matrix = self.df["N"+features].cov()
+        eig_vals,eig_vecs = np.linalg.eig(covariance_matrix)
+        idx = eig_vals.argsort()[::-1]
+        eig_vals = eig_vals[idx]
+        eig_vecs = eig_vecs[:,idx]
+
+        if not dim:
+            dim = 0
+            # Get the dimension required for 90% information
+            E = sum(eig_vals)
+            while True:
+                proportion_of_variance = sum(eig_vals[:dim])/E
+                if proportion_of_variance > 0.90: break
+                dim += 1
+
+        print("%d..."%dim,end="")
+        self.V = eig_vecs[:,:dim]
+
+        #Calculate the projection of original vectors in new directions
+        new_space = (self.df[features]@self.V).add_prefix("F")
+
+        self.df.drop(features,axis=1,inplace=True)
+        self.df.drop("N"+features,axis=1,inplace=True)
+
+        self.df = pd.concat([self.df,new_space],axis=1)
 

@@ -8,6 +8,7 @@ from preProcess import *
 DATASET = "try.csv"
 #DATASET = "BitcoinHeistData.csv"
 
+@status_decorator
 def split_dataset(data,perc=.80):
     # 80 - 20 % is Pareto principle by default
     global tr,te,vl
@@ -23,15 +24,14 @@ def split_dataset(data,perc=.80):
 
     te.reset_index(drop=True,inplace=True)
     vl.reset_index(drop=True,inplace=True)
-    print("Done")
     
 def main():
     df = pd.read_csv(DATASET)
     split_dataset(df)
     del df
-    preprocess(tr)
-    tr.info()
-    print(tr)
+    preprocess = PreProcessor(tr)
+    preprocess.df.info()
+    print(preprocess.V)
 
 if __name__=="__main__":
     main()

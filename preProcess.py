@@ -14,6 +14,9 @@ def virus_location(virus_name):
     if virus_name.startswith("princeton"): return "princeton"
     return virus_name
 
+codes = {0:"white",1:"montreal",2:"padua",3:"princeton"}
+backcodes = {"white":0,"montreal":1,"padua":2,"princeton":3}
+
 class PreProcessor:
 
     def __init__(self,dataframe,dim=None):
@@ -80,8 +83,8 @@ class PreProcessor:
         print("%d..."%dim,end="")
         self.V = eig_vecs[:,:dim]
 
-        #Calculate the projection of original vectors in new directions
-        new_space = (self.df[features]@self.V).add_prefix("F")
+        #Calculate the projection of original/normalised("N") vectors in new directions
+        new_space = (self.df["N"+features]@self.V).add_prefix("F")
 
         self.df.drop(features,axis=1,inplace=True)
         self.df.drop("N"+features,axis=1,inplace=True)

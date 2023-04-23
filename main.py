@@ -10,12 +10,10 @@ from matplotlib import pyplot as plt
 from preProcess import *
 from model import *
 
-#DATASET = "try.csv"
-
 @status_decorator
 def split_dataset(data,perc=.80):
     # 80 - 20 % is Pareto principle by default
-    global tr,te,vl
+    global tr,te,vl,codes
     print("Spliting data...",end="")
 
     # Below line can be removed or commented to be more specific about the virus
@@ -31,7 +29,22 @@ def split_dataset(data,perc=.80):
 
     te.reset_index(drop=True,inplace=True)
     vl.reset_index(drop=True,inplace=True)
-    
+
+def scatter_graph():
+    global preprocess,classification
+    a = "F0","F1","F2","F3","F4","F5"
+    for x in range(len(a)):
+        plt.rcParams["figure.figsize"] = 12,8
+        plt.figure()
+        for y in range(x+1,len(a)):
+            plt.subplot(2,3,y)
+            plt.scatter(preprocess.df[a[x]][classification=="montreal"],preprocess.df[a[y]][classification=="montreal"],label="montreal")
+            plt.scatter(preprocess.df[a[x]][classification=="padua"],preprocess.df[a[y]][classification=="padua"],label="padua")
+            plt.scatter(preprocess.df[a[x]][classification=="princeton"],preprocess.df[a[y]][classification=="princeton"],label="princeton")
+            plt.scatter(preprocess.df[a[x]][classification=="white"],preprocess.df[a[y]][classification=="white"],label="white")
+            plt.legend()
+
+   
 def main(args=None):
     DATASET = args.dataset
 
@@ -40,12 +53,12 @@ def main(args=None):
     del df
 
     # Preprocessing Data
-    if args.preprocess:
+    if args.preprocess and not args.model:
         preprocess = pickle.load(args.preprocess)
         args.preprocess.close()
     else:
         preprocess = PreProcessor(tr)
-        with open(DATASET[:-4]+'preprocessed.obj',"wb") as file: pickle.dump(preprocess,file)
+        with open(DATASET[:-4]+'_preprocessed.obj',"wb") as file: pickle.dump(preprocess,file)
 
     class_table = preprocess.df.label.value_counts()
     class_table.plot(kind='bar',title="Distribution of class table")
@@ -53,12 +66,21 @@ def main(args=None):
     print(class_table)
 
 
-    classifier = Classifier(preprocess.df)
+    if args.model:
+        classifier = pickle.load(args.model)
+        args.model.close()
+    else:
+        classifier = Classifier(preprocess.df)
+        with open(DATASET[:-4]+'_model.obj','wb') as file: pickle.dump(classifier,file)
+
     print("\nCategories:")
     print(classifier.categories)
 
     features = te.columns[(te.dtypes==np.float64) | (te.dtypes==np.int64)]
 
+    classification = preprocess.df.label
+
+    #scatter_graph()
 
 if __name__=="__main__":
 

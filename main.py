@@ -9,6 +9,7 @@ from matplotlib import pyplot as plt
 
 from preProcess import *
 from model import *
+from predict import *
 
 @status_decorator
 def split_dataset(data,perc=.80):
@@ -53,32 +54,43 @@ def main(args=None):
     del df
 
     # Preprocessing Data
-    if args.preprocess and not args.model:
+    if args.preprocess:
         preprocess = pickle.load(args.preprocess)
         args.preprocess.close()
+    elif args.model or args.result: pass
     else:
         preprocess = PreProcessor(tr)
+        preprocess.preprocessing()
+
         with open(DATASET[:-4]+'_preprocessed.obj',"wb") as file: pickle.dump(preprocess,file)
+        print("\nPreprocessed data was saved")
 
-    class_table = preprocess.df.label.value_counts()
-    class_table.plot(kind='bar',title="Distribution of class table")
-    print("\nCurrent distribution of training data:")
-    print(class_table)
+        classification = preprocess.df.label
+        class_table = classification.value_counts()
+        class_table.plot(kind='bar',title="Distribution of class table")
+        print("\nCurrent distribution of training data:")
+        print(class_table)
 
 
+    # Training On Data
     if args.model:
-        classifier = pickle.load(args.model)
+        preprocess,classifier = pickle.load(args.model)
         args.model.close()
     else:
         classifier = Classifier(preprocess.df)
-        with open(DATASET[:-4]+'_model.obj','wb') as file: pickle.dump(classifier,file)
+        with open(DATASET[:-4]+'_model.obj','wb') as file: pickle.dump((preprocess,classifier),file)
+        print("\nClassifier data was saved")
 
-    print("\nCategories:")
-    print(classifier.categories)
+        print("\nCategories:")
+        print(classifier.categories)
 
     features = te.columns[(te.dtypes==np.float64) | (te.dtypes==np.int64)]
+    predictor = Predictor(preprocess,classifier)
 
-    classification = preprocess.df.label
+    predictor.predict(vl)
+
+    print("\nConfusion Matrix")
+    print(predictor.cm)
 
     #scatter_graph()
 

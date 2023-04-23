@@ -14,6 +14,9 @@ def virus_location(virus_name):
     if virus_name.startswith("princeton"): return "princeton"
     return virus_name
 
+def ransom(virus_name):
+    if virus_name=="white": return virus_name
+    else: return "ransom"
 codes = {0:"white",1:"montreal",2:"padua",3:"princeton"}
 backcodes = {"white":0,"montreal":1,"padua":2,"princeton":3}
 
@@ -23,6 +26,7 @@ class PreProcessor:
         self.df = dataframe
         self.df.rename(columns={"count":"counts"},inplace=True)
 
+    def preprocessing(self):
         self.random_undersampling()
         self.clean_data()
         self.change_dtypes()
@@ -58,12 +62,12 @@ class PreProcessor:
     @status_decorator
     def dim_reduction(self,dim=None):
         print("Reducing dimensions to ",end="")
-        meanframe = self.df.mean()
-        stdframe = self.df.std(ddof=0,numeric_only=True)
-        features = meanframe.index
+        self.meanframe = self.df.mean()
+        self.stdframe = self.df.std(ddof=0,numeric_only=True)
+        features = self.meanframe.index
         #normalising the values and adding them at the end
         for feature in features:
-            self.df['N'+feature] = (self.df[feature] - meanframe[feature])/stdframe[feature]
+            self.df['N'+feature] = (self.df[feature] - self.meanframe[feature])/self.stdframe[feature]
 
         covariance_matrix = self.df["N"+features].cov()
         eig_vals,eig_vecs = np.linalg.eig(covariance_matrix)

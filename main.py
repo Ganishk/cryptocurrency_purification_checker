@@ -57,32 +57,29 @@ def main(args=None):
     if args.preprocess:
         preprocess = pickle.load(args.preprocess)
         args.preprocess.close()
-    elif args.model or args.result: pass
+    #elif args.model or args.result: pass
     else:
         preprocess = PreProcessor(tr)
         preprocess.preprocessing()
 
         with open(DATASET[:-4]+'_preprocessed.obj',"wb") as file: pickle.dump(preprocess,file)
-        print("\nPreprocessed data was saved")
+        print("\n[+] Preprocessed data was saved")
 
         classification = preprocess.df.label
         class_table = classification.value_counts()
         class_table.plot(kind='bar',title="Distribution of class table")
-        print("\nCurrent distribution of training data:")
-        print(class_table)
-
 
     # Training On Data
     if args.model:
-        preprocess,classifier = pickle.load(args.model)
+        classifier = pickle.load(args.model)
         args.model.close()
     else:
         classifier = Classifier(preprocess.df)
-        with open(DATASET[:-4]+'_model.obj','wb') as file: pickle.dump((preprocess,classifier),file)
-        print("\nClassifier data was saved")
+        with open(DATASET[:-4]+'_model.obj','wb') as file: pickle.dump(classifier,file)
+        print("\n[+] Classifier data was saved")
 
-        print("\nCategories:")
-        print(classifier.categories)
+        #print("\nCategories:")
+        #print(classifier.categories)
 
     features = te.columns[(te.dtypes==np.float64) | (te.dtypes==np.int64)]
     predictor = Predictor(preprocess,classifier)

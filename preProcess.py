@@ -17,8 +17,12 @@ def virus_location(virus_name):
 def ransom(virus_name):
     if virus_name=="white": return virus_name
     else: return "ransom"
+
 codes = {0:"white",1:"montreal",2:"padua",3:"princeton"}
 backcodes = {"white":0,"montreal":1,"padua":2,"princeton":3}
+
+#codes = {0:"white",1:"ransom"}
+#backcodes = {"ransom":1,"white":0}
 
 class PreProcessor:
 
@@ -81,7 +85,7 @@ class PreProcessor:
             E = sum(eig_vals)
             while True:
                 proportion_of_variance = sum(eig_vals[:dim])/E
-                if proportion_of_variance > 0.90: break
+                if proportion_of_variance > 0.80: break
                 dim += 1
 
         print("%d..."%dim,end="")

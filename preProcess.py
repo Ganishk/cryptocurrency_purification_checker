@@ -19,8 +19,6 @@ class PreProcessor:
     def __init__(self,dataframe,dim=None):
         self.df = dataframe
         self.df.rename(columns={"count":"counts"},inplace=True)
-        # Below line can be removed or commented to be more specific about the virus
-        self.df.label = self.df.label.apply(virus_location)
 
         self.random_undersampling()
         self.clean_data()

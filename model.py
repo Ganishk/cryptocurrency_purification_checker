@@ -11,6 +11,4 @@ class Classifier:
         self.classify()
 
     def classify(self):
-        X = self.df[self.features]
-        self.codes = dict(zip(self.df.label.cat.codes,self.df.label))
-        self.w = np.linalg.inv( X.transpose() @ X ) @ X.transpose() @ self.df.label.cat.codes
+        pass

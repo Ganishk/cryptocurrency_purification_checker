@@ -85,26 +85,32 @@ def main(args=None):
     features = te.columns[(te.dtypes==np.float64) | (te.dtypes==np.int64)]
     predictor = Predictor(preprocess,classifier)
 
-    #############################################
-    #########MLE
-    #############################################
+    ##################################################
+    ###################### MLE #######################
+    ##################################################
 
-    print("\n\n"+"*"*50+"\nMultiple Linear Regression\n"+"*"*50)
+    print("\n\n"+"*"*50+"\n"+"Multiple Linear Regression".center(50," ")+"\n"+"*"*50+"\n")
     predictor.mlr(vl)
 
     print("\nConfusion Matrix")
     print(predictor.cm)
     predictor.get_score()
 
-    #############################################
-    #########MLE
-    #############################################
+    ##################################################
+    ###################### OLS #######################
+    ##################################################
 
-    print("\n\n"+"*"*50+"\nOrdinary Least Squares\n"+"*"*50)
-    predictor.ole(te)
+    print("\n\n"+"*"*50+"\n"+"Ordinary Least Squares".center(50," ")+"\n"+"*"*50+"\n")
+    predictor.ols(te)
     print("\nConfusion Matrix")
     print(predictor.cm)
     predictor.get_score()
+
+    ##################################################
+    #######################ols########################
+    ##################################################
+
+
 if __name__=="__main__":
 
     parser = argparse.ArgumentParser(description="CSOE18 ML Project")

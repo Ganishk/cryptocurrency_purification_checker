@@ -21,4 +21,4 @@ class Classifier:
     def ols(self):
         #Ordinary Least Square method
         g = self.df[self.features]
-        self.ol_w = np.linalg.inv( g.transpose() @ g ) @ g.transpose() @ self.df.label.apply(lambda x: backcodes[x])
+        self.ol_w = (np.linalg.inv( g.transpose() @ g ) @ g.transpose() @ self.df.label.apply(lambda x: backcodes[x])).to_numpy()

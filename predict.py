@@ -37,7 +37,7 @@ class Predictor:
         self.create_confusion_matrix()
 
 
-    def ole(self,testdf):
+    def ols(self,testdf):
         self.predict(testdf)
         
         X = self.red[self.new_features]
@@ -53,13 +53,12 @@ class Predictor:
         self.create_confusion_matrix()
 
 
-
-
     def dim_red(self):
         """
         This function is used to reduce dimension of the test set, using the
         same transformation matrix used for training set
         """
+        self.red = None
         for feature in self.features:
             self.test_data.df['S'+feature] = (self.test_data.df[feature] - self.pp.meanframe[feature])/self.pp.stdframe[feature]
 

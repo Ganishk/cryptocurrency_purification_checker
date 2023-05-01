@@ -8,21 +8,21 @@ class Predictor:
         self.cfy = classifier
         self.pp = preprocessor
 
-    def predict(self,test_df):
+    def take_test(self,test_df):
         #perform renaming and changing datatypes
         self.test_data = PreProcessor(test_df)
         self.test_data.change_dtypes()
         self.features = test_df.columns[(test_df.dtypes==np.float64) | (test_df.dtypes==np.int64)]
 
-        self.dim_red()
+        self.dim_red() #self.red DF is created with reduced features
         self.new_features = self.red.columns[(self.red.dtypes==np.float64) | (self.red.dtypes==np.int64)]
 
 
-    def mlr(self,testdf):
+    def mlr(self,testdf=None):
         """
         Using multiple linear regression
         """
-        self.predict(testdf)
+        if testdf: self.take_test(testdf)
 
         X = np.c_[self.red[self.new_features],np.ones((len(self.red),1),np.int64)]
         Y = X @ self.cfy.mr_w
@@ -37,8 +37,8 @@ class Predictor:
         self.create_confusion_matrix()
 
 
-    def ols(self,testdf):
-        self.predict(testdf)
+    def ols(self,testdf=None):
+        if testdf: self.take_test(testdf)
         
         X = self.red[self.new_features]
         Y = X @ self.cfy.ol_w
@@ -52,6 +52,16 @@ class Predictor:
 
         self.create_confusion_matrix()
 
+    def knn(self,testdf=None,k=3):
+        if testdf: self.take_test(testdf)
+
+        self.cfy.knn(self.red[self.new_features].iloc[0].to_numpy())
+        prediction = []
+        for i in range(len(self.red)):
+            label = self.cfy.knn(self.red[self.new_features].iloc[i].to_numpy())
+            self.red['predicted'] = backcodes[label]
+
+        self.create_confusion_matrix()
 
     def dim_red(self):
         """
@@ -67,6 +77,7 @@ class Predictor:
         self.red = new_space
 
     def create_confusion_matrix(self):
+        # Dict are unordered, so creating an ordered tuple here
         classes = ("white","montreal","padua","princeton")
         mClass = tuple(map(lambda x: backcodes[x],classes))
         self.cm = np.eye(len(classes))

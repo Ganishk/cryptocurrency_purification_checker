@@ -85,12 +85,14 @@ def main(args=None):
     features = te.columns[(te.dtypes==np.float64) | (te.dtypes==np.int64)]
     predictor = Predictor(preprocess,classifier)
 
+    predictor.take_test(te)
+
     ##################################################
     ###################### MLE #######################
     ##################################################
 
     print("\n\n"+"*"*50+"\n"+"Multiple Linear Regression".center(50," ")+"\n"+"*"*50+"\n")
-    predictor.mlr(vl)
+    predictor.mlr()
 
     print("\nConfusion Matrix")
     print(predictor.cm)
@@ -101,14 +103,26 @@ def main(args=None):
     ##################################################
 
     print("\n\n"+"*"*50+"\n"+"Ordinary Least Squares".center(50," ")+"\n"+"*"*50+"\n")
-    predictor.ols(te)
+    predictor.ols()
     print("\nConfusion Matrix")
     print(predictor.cm)
     predictor.get_score()
 
     ##################################################
-    #######################ols########################
+    ################## Naive Bayes ###################
     ##################################################
+
+    print("\n\n"+"*"*50+"\n"+"Naive Bayes Algorithm".center(50," ")+"\n"+"*"*50+"\n")
+
+    ##################################################
+    ###################### kNN #######################
+    ##################################################
+
+    print("\n\n"+"*"*50+"\n"+"k-Nearest Neighbours".center(50," ")+"\n"+"*"*50+"\n")
+    predictor.knn()
+    print("\nConfusion Matrix")
+    print(predictor.cm)
+    predictor.get_score()
 
 
 if __name__=="__main__":

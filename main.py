@@ -85,24 +85,12 @@ def main(args=None):
     features = te.columns[(te.dtypes==np.float64) | (te.dtypes==np.int64)]
     predictor = Predictor(preprocess,classifier)
 
-    plt.figure()
-    plt.plot(preprocess.df.F0)
-    plt.figure()
-    plt.plot(preprocess.df.F1)
-    plt.figure()
-    plt.plot(preprocess.df.F2)
-    plt.figure()
-    plt.plot(preprocess.df.F3)
-    plt.figure()
-    plt.plot(preprocess.df.F4)
-
     predictor.predict(vl)
 
     print("\nConfusion Matrix")
     print(predictor.cm)
     predictor.get_score()
 
-    #scatter_graph()
 
 if __name__=="__main__":
 
@@ -111,7 +99,7 @@ if __name__=="__main__":
     parser.add_argument('-d','--dataset',type=str,required=True)
     parser.add_argument('-p','--preprocess',type=argparse.FileType('rb'))
     parser.add_argument('-m','--model',type=argparse.FileType('rb'))
-    parser.add_argument('-r','--result',metavar="nooooo",type=argparse.FileType('rb'))
+    parser.add_argument('-r','--result',type=argparse.FileType('rb'))
 
     main(parser.parse_args())
     plt.legend()

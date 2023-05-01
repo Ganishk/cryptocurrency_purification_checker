@@ -52,12 +52,35 @@ class Predictor:
 
         self.create_confusion_matrix()
 
+
+    def _calc_likelihood(self,x,mean,std):
+        print(x,mean,std)
+        exp = np.exp(-.5*((x-mean)/std)**2)
+        return (1/(np.sqrt(2*np.pi)*std))*exp
+
+    def naive_bayes(self,testdf=None):
+        if testdf: self.take_test(testdf)
+
+        for i in range(self.red.shape[0]):
+            posterior_probabilities = {}
+            for virus in self.cfy.priors:
+                likelihood = 1
+                for feature in self.new_features:
+                    mean = self.cfy.posteriors[virus][feature]['mean']
+                    std = self.cfy.posteriors[virus][feature]['std']
+                    likelihood *= self._calc_likelihood(self.red[feature].iloc[i],mean,std)
+                posterior_probabilities[virus] = likelihood*self.cfy.priors[virus]
+            self.red['predicted'] = backcodes[max(posterior_probabilities,key=posterior_probabilities.get)]
+
+        self.create_confusion_matrix()
+
+
     def knn(self,testdf=None,k=3):
         if testdf: self.take_test(testdf)
 
         self.cfy.knn(self.red[self.new_features].iloc[0].to_numpy())
         prediction = []
-        for i in range(len(self.red)):
+        for i in range(self.red.shape[0]):
             label = self.cfy.knn(self.red[self.new_features].iloc[i].to_numpy())
             self.red['predicted'] = backcodes[label]
 

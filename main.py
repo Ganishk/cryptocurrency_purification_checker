@@ -113,6 +113,10 @@ def main(args=None):
     ##################################################
 
     print("\n\n"+"*"*50+"\n"+"Naive Bayes Algorithm".center(50," ")+"\n"+"*"*50+"\n")
+    predictor.naive_bayes()
+    print("Confusion Matrix")
+    print(predictor.cm)
+    predictor.get_score()
 
     ##################################################
     ###################### kNN #######################

@@ -9,8 +9,9 @@ class Classifier:
         self.categories = self.df.label.cat.categories
         self.features = self.df.columns[(self.df.dtypes==np.float64) | (self.df.dtypes==np.int64)]
 
-        self.multiple_regression()
         self.ols()
+        self.multiple_regression()
+        self.naive_bayes()
 
 
     def multiple_regression(self):
@@ -35,3 +36,17 @@ class Classifier:
         result = self.df.label.iloc[idx]
         return result.mode()[0]
 
+    def naive_bayes(self):
+        # Gaussian Naive Bayes
+        self.priors = {} # P(Ci) - Prior probabilities
+        self.posteriors = {} # P(Ci|X)
+        n = self.df.shape[0]
+        for virus in backcodes:
+            f_virus = self.df[self.df.label == virus]
+            self.priors[virus] = f_virus.shape[0]/n
+            self.posteriors[virus] = {}
+            for feature in self.features:
+                self.posteriors[virus][feature] = {
+                        'mean': f_virus[feature].mean(),
+                        'std': f_virus[feature].std()
+                    }

@@ -54,7 +54,6 @@ class Predictor:
 
 
     def _calc_likelihood(self,x,mean,std):
-        print(x,mean,std)
         exp = np.exp(-.5*((x-mean)/std)**2)
         return (1/(np.sqrt(2*np.pi)*std))*exp
 

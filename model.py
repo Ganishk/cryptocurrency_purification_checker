@@ -9,9 +9,10 @@ class Classifier:
         self.categories = self.df.label.cat.categories
         self.features = self.df.columns[(self.df.dtypes==np.float64) | (self.df.dtypes==np.int64)]
 
-        self.train()
+        self.multiple_regression()
 
-    def train(self):
+
+    def multiple_regression(self):
         #multiple linear regression
         g = np.c_[self.df[self.features],np.ones((len(self.df),1),np.int64)]
-        self.w = np.linalg.inv( g.transpose() @ g ) @ g.transpose() @ self.df.label.apply(lambda x: backcodes[x])
+        self.mr_w = np.linalg.inv( g.transpose() @ g ) @ g.transpose() @ self.df.label.apply(lambda x: backcodes[x])

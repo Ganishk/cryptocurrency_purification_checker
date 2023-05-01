@@ -67,6 +67,7 @@ def main(args=None):
 
         classification = preprocess.df.label
         class_table = classification.value_counts()
+        plt.figure()
         class_table.plot(kind='bar',title="Distribution of class table")
 
     # Training On Data
@@ -84,10 +85,22 @@ def main(args=None):
     features = te.columns[(te.dtypes==np.float64) | (te.dtypes==np.int64)]
     predictor = Predictor(preprocess,classifier)
 
+    plt.figure()
+    plt.plot(preprocess.df.F0)
+    plt.figure()
+    plt.plot(preprocess.df.F1)
+    plt.figure()
+    plt.plot(preprocess.df.F2)
+    plt.figure()
+    plt.plot(preprocess.df.F3)
+    plt.figure()
+    plt.plot(preprocess.df.F4)
+
     predictor.predict(vl)
 
     print("\nConfusion Matrix")
     print(predictor.cm)
+    predictor.get_score()
 
     #scatter_graph()
 
@@ -101,4 +114,5 @@ if __name__=="__main__":
     parser.add_argument('-r','--result',metavar="nooooo",type=argparse.FileType('rb'))
 
     main(parser.parse_args())
+    plt.legend()
     plt.show()

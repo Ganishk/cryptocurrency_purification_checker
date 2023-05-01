@@ -85,13 +85,26 @@ def main(args=None):
     features = te.columns[(te.dtypes==np.float64) | (te.dtypes==np.int64)]
     predictor = Predictor(preprocess,classifier)
 
-    predictor.predict(vl)
+    #############################################
+    #########MLE
+    #############################################
+
+    print("\n\n"+"*"*50+"\nMultiple Linear Regression\n"+"*"*50)
+    predictor.mlr(vl)
 
     print("\nConfusion Matrix")
     print(predictor.cm)
     predictor.get_score()
 
+    #############################################
+    #########MLE
+    #############################################
 
+    print("\n\n"+"*"*50+"\nOrdinary Least Squares\n"+"*"*50)
+    predictor.ole(te)
+    print("\nConfusion Matrix")
+    print(predictor.cm)
+    predictor.get_score()
 if __name__=="__main__":
 
     parser = argparse.ArgumentParser(description="CSOE18 ML Project")

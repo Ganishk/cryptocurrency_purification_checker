@@ -18,6 +18,12 @@ class Predictor:
         self.new_features = self.red.columns[(self.red.dtypes==np.float64) | (self.red.dtypes==np.int64)]
 
 
+    def mlr(self,testdf):
+        """
+        Using multiple linear regression
+        """
+        self.predict(testdf)
+
         X = np.c_[self.red[self.new_features],np.ones((len(self.red),1),np.int64)]
         Y = X @ self.cfy.mr_w
 
@@ -31,7 +37,29 @@ class Predictor:
         self.create_confusion_matrix()
 
 
+    def ole(self,testdf):
+        self.predict(testdf)
+        
+        X = self.red[self.new_features]
+        Y = X @ self.cfy.ol_w
+
+        def wrap(num):
+            if 0<= num <=3: return num
+            return 0
+
+        self.red['predicted'] = Y
+        self.red.predicted = self.red.predicted.apply(round).apply(wrap)
+
+        self.create_confusion_matrix()
+
+
+
+
     def dim_red(self):
+        """
+        This function is used to reduce dimension of the test set, using the
+        same transformation matrix used for training set
+        """
         for feature in self.features:
             self.test_data.df['S'+feature] = (self.test_data.df[feature] - self.pp.meanframe[feature])/self.pp.stdframe[feature]
 
